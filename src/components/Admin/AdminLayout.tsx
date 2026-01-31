@@ -90,10 +90,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
 
             {/* Sidebar */}
             <aside
-                className={`flex-shrink-0 border-r border-white/10 flex flex-col h-screen bg-[#0A0A0A] transition-all duration-300 ease-in-out
+                className={`flex-shrink-0 border-r border-white/10 flex flex-col h-screen bg-[#0A0A0A] transition-all duration-300 ease-in-out z-30
                 ${isMobileOpen
                         ? "fixed inset-y-0 left-0 z-50 w-64 translate-x-0"
-                        : "fixed lg:sticky top-0 inset-y-0 left-0 z-50 lg:z-30 -translate-x-full lg:translate-x-0"
+                        : "fixed lg:sticky top-0 left-0 -translate-x-full lg:translate-x-0"
                     }
                 ${isCollapsed ? "lg:w-20" : "lg:w-64"}`}
             >
@@ -131,8 +131,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 min-h-screen pt-16 lg:pt-0 overflow-x-hidden">
-                <div className="p-8 max-w-6xl mx-auto">
+            <main className="flex-1 min-h-[100dvh] pt-16 lg:pt-0 overflow-x-hidden w-full">
+                <div className="p-6 md:p-8 lg:p-12 max-w-[1600px] mx-auto">
                     {children}
                 </div>
             </main>
