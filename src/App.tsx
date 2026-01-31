@@ -886,10 +886,10 @@ export default function App() {
     setCurrentScreen("campaign-detail");
   };
 
-  const handleToggleAuth = () => {
+  const handleToggleAuth = async () => {
     if (isAuthenticated) {
-      supabase.auth.signOut();
-      navigate("/login");
+      await supabase.auth.signOut();
+      window.location.href = "/login";
     }
   };
 
