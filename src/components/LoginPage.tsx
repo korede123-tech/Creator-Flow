@@ -8,27 +8,18 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
-  const [method, setMethod] = useState<"magic" | "password">("magic");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberEmail, setRememberEmail] = useState(true);
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const savedEmail = window.localStorage.getItem("dt_last_email") || "";
-    const savedMethod = window.localStorage.getItem("dt_login_method") as
-      | "magic"
-      | "password"
-      | null;
     const savedRemember = window.localStorage.getItem("dt_remember_email");
 
-    if (savedMethod === "magic" || savedMethod === "password")
-      setMethod(savedMethod);
     if (savedRemember === "0") setRememberEmail(false);
     if (savedEmail) setEmail(savedEmail);
   }, []);
@@ -39,7 +30,7 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
     if (!email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email))
       newErrors.email = "Invalid email address";
-    if (method === "password" && !password)
+    if (!password)
       newErrors.password = "Password is required";
 
     setErrors(newErrors);
@@ -53,27 +44,12 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
     setStatus("sending");
     setStatusMessage("");
     try {
-      window.localStorage.setItem("dt_login_method", method);
       window.localStorage.setItem(
         "dt_remember_email",
         rememberEmail ? "1" : "0",
       );
       if (rememberEmail) window.localStorage.setItem("dt_last_email", email);
       else window.localStorage.removeItem("dt_last_email");
-
-      if (method === "magic") {
-        const redirectTo = `${window.location.origin}/`;
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: redirectTo },
-        });
-        if (error) throw error;
-        setStatus("sent");
-        setStatusMessage(
-          "Magic link sent. Check your email to finish signing in.",
-        );
-        return;
-      }
 
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -86,11 +62,7 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
       setStatus("error");
       const message = err instanceof Error ? err.message : "Login failed";
       if (message === "Invalid login credentials") {
-        setStatusMessage(
-          method === "password"
-            ? "Invalid login credentials. Make sure you signed up with a password (not magic link only), or use “Magic link” to sign in."
-            : "Invalid login credentials. Try again or use “Magic link” to sign in.",
-        );
+        setStatusMessage("Invalid login credentials. Please check your email and password.");
       } else {
         setStatusMessage(message);
       }
@@ -117,44 +89,8 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
           <div className="mb-8">
             <h1 className="text-2xl font-semibold mb-2">Welcome back</h1>
             <p className="text-sm text-white/60">
-              Log in with a magic link or password
+              Log in to your account
             </p>
-          </div>
-
-          {/* Method toggle */}
-          <div className="mb-5 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setMethod("magic");
-                setErrors({});
-                setStatus("idle");
-                setStatusMessage("");
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                method === "magic"
-                  ? "bg-white text-black border-white"
-                  : "bg-transparent text-white/70 border-white/10 hover:border-white/20"
-              }`}
-            >
-              Magic link
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMethod("password");
-                setErrors({});
-                setStatus("idle");
-                setStatusMessage("");
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                method === "password"
-                  ? "bg-white text-black border-white"
-                  : "bg-transparent text-white/70 border-white/10 hover:border-white/20"
-              }`}
-            >
-              Password
-            </button>
           </div>
 
           {/* Form */}
@@ -178,37 +114,35 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
               )}
             </div>
 
-            {method === "password" && (
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium mb-2"
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
+                  placeholder="Enter your password"
+                  disabled={status === "sending"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                 >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
-                    placeholder="Enter your password"
-                    disabled={status === "sending"}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-red-400 text-xs mt-1">{errors.password}</p>
-                )}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
-            )}
+              {errors.password && (
+                <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+              )}
+            </div>
 
             {/* Remember email */}
             <div className="flex items-center gap-3">
@@ -226,11 +160,7 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
 
             {statusMessage && (
               <div
-                className={`rounded-lg border px-4 py-3 text-sm ${
-                  status === "sent"
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200"
-                    : "bg-red-500/10 border-red-500/20 text-red-200"
-                }`}
+                className={`rounded-lg border px-4 py-3 text-sm bg-red-500/10 border-red-500/20 text-red-200`}
               >
                 <div className="flex items-center gap-2">
                   <Mail size={16} />
@@ -246,16 +176,10 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
               disabled={
                 !email.trim() ||
                 status === "sending" ||
-                (method === "password" && !password)
+                !password
               }
             >
-              {status === "sending"
-                ? "Working…"
-                : method === "magic"
-                  ? status === "sent"
-                    ? "Resend link"
-                    : "Send magic link"
-                  : "Log in"}
+              {status === "sending" ? "Working…" : "Log in"}
             </button>
           </form>
 

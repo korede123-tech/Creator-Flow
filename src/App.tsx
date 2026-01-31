@@ -104,7 +104,7 @@ export interface AccountData {
   fullName: string;
   email: string;
   phone: string;
-  password?: string;
+  password: string;
   agreeToTerms: boolean;
 }
 
@@ -830,33 +830,19 @@ export default function App() {
 
     // If password was provided, create an email+password user.
     // Otherwise, default to magic link.
-    if (accountData.password) {
-      const { error } = await supabase.auth.signUp({
-        email: accountData.email,
-        password: accountData.password,
-        options: {
-          data: {
-            full_name: accountData.fullName,
-            phone: accountData.phone,
-          },
-          emailRedirectTo: `${window.location.origin}/`,
+    const { error } = await supabase.auth.signUp({
+      email: accountData.email,
+      password: accountData.password,
+      options: {
+        data: {
+          full_name: accountData.fullName,
+          phone: accountData.phone,
         },
-      });
-      if (error) {
-        console.error("Sign up failed:", error);
-      }
-    } else {
-      const redirectTo = `${window.location.origin}/`;
-      await supabase.auth.signInWithOtp({
-        email: accountData.email,
-        options: {
-          emailRedirectTo: redirectTo,
-          data: {
-            full_name: accountData.fullName,
-            phone: accountData.phone,
-          },
-        },
-      });
+        emailRedirectTo: `${window.location.origin}/`,
+      },
+    });
+    if (error) {
+      console.error("Sign up failed:", error);
     }
     setSignupStep(1);
     navigate("/login");

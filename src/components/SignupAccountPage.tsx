@@ -15,7 +15,6 @@ export function SignupAccountPage({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [usePassword, setUsePassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,13 +30,11 @@ export function SignupAccountPage({
     else if (!/\S+@\S+\.\S+/.test(email))
       newErrors.email = "Invalid email address";
     if (!phone.trim()) newErrors.phone = "Phone number is required";
-    if (usePassword) {
-      if (!password) newErrors.password = "Password is required";
-      else if (password.length < 8)
-        newErrors.password = "Password must be at least 8 characters";
-      if (password !== confirmPassword)
-        newErrors.confirmPassword = "Passwords do not match";
-    }
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 8)
+      newErrors.password = "Password must be at least 8 characters";
+    if (password !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
     if (!agreeToTerms)
       newErrors.terms = "You must agree to the Terms and Privacy";
 
@@ -52,7 +49,7 @@ export function SignupAccountPage({
         fullName,
         email,
         phone,
-        password: usePassword ? password : undefined,
+        password,
         agreeToTerms,
       });
     }
@@ -141,94 +138,78 @@ export function SignupAccountPage({
               )}
             </div>
 
-            {/* Auth method */}
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                id="usePassword"
-                checked={usePassword}
-                onChange={(e) => setUsePassword(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded border-white/20 bg-white/5 text-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9] focus:ring-offset-0"
-              />
-              <label htmlFor="usePassword" className="text-sm text-white/80">
-                Use a password (optional). If unchecked, we’ll email you a magic
-                link.
-              </label>
-            </div>
 
-            {usePassword && (
-              <>
-                {/* Password */}
-                <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium mb-2"
+            <>
+              {/* Password */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium mb-2"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
+                    placeholder="Create a password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   >
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
-                      placeholder="Create a password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {errors.password}
-                    </p>
-                  )}
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
+                {errors.password && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
 
-                {/* Confirm Password */}
-                <div>
-                  <label
-                    htmlFor="confirmPassword"
-                    className="block text-sm font-medium mb-2"
+              {/* Confirm Password */}
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium mb-2"
+                >
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   >
-                    Confirm password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] transition-all"
-                      placeholder="Confirm your password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={20} />
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {errors.confirmPassword}
-                    </p>
-                  )}
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
+                  </button>
                 </div>
-              </>
-            )}
+                {errors.confirmPassword && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
+            </>
 
             {/* Terms Checkbox */}
             <div className="flex items-start gap-3">
