@@ -3,6 +3,7 @@ import type { Session } from "@supabase/supabase-js";
 import { SignupAccountPage } from "./components/SignupAccountPage";
 import { SignupSocialPage } from "./components/SignupSocialPage";
 import { SignupPayoutPage } from "./components/SignupPayoutPage";
+import { SignupSuccessPage } from "./components/SignupSuccessPage";
 import { LoginPage } from "./components/LoginPage";
 import { Home } from "./components/Home";
 import { Campaigns } from "./components/Campaigns";
@@ -830,22 +831,33 @@ export default function App() {
 
     // If password was provided, create an email+password user.
     // Otherwise, default to magic link.
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: accountData.email,
       password: accountData.password,
       options: {
         data: {
           full_name: accountData.fullName,
           phone: accountData.phone,
+          role: "creator", // Default role
         },
         emailRedirectTo: `${window.location.origin}/`,
       },
     });
+
     if (error) {
       console.error("Sign up failed:", error);
+      toast.error(error.message);
+      return;
     }
-    setSignupStep(1);
-    navigate("/login");
+
+    if (signUpData.session) {
+      toast.success("Account created! Logging you in...");
+      setSignupStep(1);
+      navigate("/app");
+    } else {
+      // Show success screen (step 4)
+      setSignupStep(4);
+    }
   };
 
   const handleBackSignup = () => {
@@ -1419,14 +1431,15 @@ export default function App() {
         <Route path="/signup" element={isAuthenticated ? (role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/app" replace />) : (
           signupStep === 1 ? <SignupAccountPage onComplete={handleAccountComplete} onSwitchToLogin={switchToLogin} /> :
             signupStep === 2 ? <SignupSocialPage initialProfiles={socialProfiles} onComplete={handleSocialComplete} onBack={handleBackSignup} /> :
-              <SignupPayoutPage onComplete={handlePayoutComplete} onBack={handleBackSignup} />
+              signupStep === 3 ? <SignupPayoutPage onComplete={handlePayoutComplete} onBack={handleBackSignup} /> :
+                <SignupSuccessPage email={accountData?.email ?? ""} onContinueToLogin={switchToLogin} />
         )} />
         <Route path="/admin/*" element={<AdminView />} />
         <Route path="/app/*" element={<CreatorView />} />
         <Route path="/" element={isAuthenticated ? (role === "admin" ? <Navigate to="/admin" replace /> : <Navigate to="/app" replace />) : <Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster />
+      <Toaster richColors position="top-center" />
     </>
   );
 }
