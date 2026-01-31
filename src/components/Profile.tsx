@@ -7,6 +7,8 @@ import {
   CreditCard,
   Bell,
   Users,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
@@ -108,6 +110,9 @@ interface ProfileProps {
     audience_region: string;
     gender: string;
   }) => void | Promise<void>;
+  onLogout?: () => void;
+  onSwitchToAdmin?: () => void;
+  role?: string | null;
 }
 
 export function Profile({
@@ -118,25 +123,28 @@ export function Profile({
   onCurrencyChange,
   profile,
   bankAccount,
-  onSaveProfile = () => {},
-  onSaveBankAccount = () => {},
+  onSaveProfile = () => { },
+  onSaveBankAccount = () => { },
   managedCreators = [],
-  onAddCreator = () => {},
-  onUpdateCreator = () => {},
-  onDeleteCreator = () => {},
-  onAddSocialAccount = () => {},
-  onUpdateSocialAccount = () => {},
-  onDeleteSocialAccount = () => {},
-  onManageCreator = () => {},
-  onViewCampaigns = () => {},
+  onAddCreator = () => { },
+  onUpdateCreator = () => { },
+  onDeleteCreator = () => { },
+  onAddSocialAccount = () => { },
+  onUpdateSocialAccount = () => { },
+  onDeleteSocialAccount = () => { },
+  onManageCreator = () => { },
+  onViewCampaigns = () => { },
   accountType = "creator",
   creatorProfile = null,
   creatorSocial = [],
   creatorPackages = [],
-  onRefreshCreatorProfile = () => {},
+  onRefreshCreatorProfile = () => { },
   userId = "",
   creatorId = "",
-  onSaveCreatorProfile = () => {},
+  onSaveCreatorProfile = () => { },
+  onLogout,
+  onSwitchToAdmin,
+  role,
 }: ProfileProps) {
   const [creatorTab, setCreatorTab] = useState<"creator" | "account">(
     "account",
@@ -327,22 +335,20 @@ export function Profile({
           <button
             type="button"
             onClick={() => setCreatorTab("account")}
-            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              creatorTab === "account"
-                ? "text-white border-[#0ea5e9]"
-                : "text-slate-400 border-transparent hover:text-slate-300"
-            }`}
+            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${creatorTab === "account"
+              ? "text-white border-[#0ea5e9]"
+              : "text-slate-400 border-transparent hover:text-slate-300"
+              }`}
           >
             Account
           </button>
           <button
             type="button"
             onClick={() => setCreatorTab("creator")}
-            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              creatorTab === "creator"
-                ? "text-white border-[#0ea5e9]"
-                : "text-slate-400 border-transparent hover:text-slate-300"
-            }`}
+            className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${creatorTab === "creator"
+              ? "text-white border-[#0ea5e9]"
+              : "text-slate-400 border-transparent hover:text-slate-300"
+              }`}
           >
             Creator Profile
           </button>
@@ -416,6 +422,28 @@ export function Profile({
                 accountType === "creator" ? onSaveCreatorProfile : undefined
               }
             />
+
+            {/* Account Management Actions */}
+            <div className="pt-6 border-t border-white/[0.06] space-y-3">
+              {role === "admin" && onSwitchToAdmin && (
+                <button
+                  onClick={onSwitchToAdmin}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600/10 text-blue-400 rounded-xl text-sm font-semibold hover:bg-blue-600/20 transition-all border border-blue-600/20"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  Switch to Admin Dashboard
+                </button>
+              )}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-xl text-sm font-semibold hover:bg-red-500/20 transition-all border border-red-500/20"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -623,9 +651,9 @@ export function Profile({
                   value={
                     draftBank.bankName && draftBank.bankCode
                       ? {
-                          bankName: draftBank.bankName,
-                          bankCode: draftBank.bankCode,
-                        }
+                        bankName: draftBank.bankName,
+                        bankCode: draftBank.bankCode,
+                      }
                       : null
                   }
                   onChange={(v) =>

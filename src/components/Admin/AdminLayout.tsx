@@ -4,15 +4,12 @@ import {
     LayoutDashboard,
     TrendingUp,
     Settings,
-    LogOut,
     ChevronRight,
     Share2,
     Menu,
     X,
-    ChevronLeft,
-    Monitor
+    ChevronLeft
 } from "lucide-react";
-import { supabase } from "../../utils/supabase/client";
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -32,15 +29,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
         { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
     ];
 
-    const switchItems = [
-        { id: "creator", label: "Creator View", icon: Monitor, path: "/app" },
-    ];
-
-    const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) console.error("Error logging out:", error);
-        window.location.href = "/login";
-    };
 
     const NavItem = ({ item }: { item: typeof menuItems[0] }) => {
         const isActive = currentPath === item.path;
@@ -125,26 +113,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
                     {menuItems.map((item) => (
                         <NavItem key={item.id} item={item} />
                     ))}
-                    <div className="pt-4 pb-2">
-                        <div className={`px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider ${isCollapsed ? "lg:hidden" : ""}`}>
-                            Switch View
-                        </div>
-                        {switchItems.map((item) => (
-                            <NavItem key={item.id} item={item} />
-                        ))}
-                    </div>
                 </nav>
 
-                <div className={`p-4 border-t border-white/10 ${isCollapsed ? "lg:px-2" : ""}`}>
-                    <button
-                        onClick={handleLogout}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-colors ${isCollapsed ? "lg:justify-center lg:px-2" : ""}`}
-                        title={isCollapsed ? "Logout" : ""}
-                    >
-                        <LogOut className="w-5 h-5 flex-shrink-0" />
-                        {(!isCollapsed || isMobileOpen) && <span className="font-medium whitespace-nowrap">Logout</span>}
-                    </button>
-                </div>
             </aside>
 
             {/* Main Content */}

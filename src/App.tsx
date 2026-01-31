@@ -1323,6 +1323,9 @@ export default function App() {
                       ? handleSaveCreatorProfile
                       : undefined
                   }
+                  role={role}
+                  onLogout={handleToggleAuth}
+                  onSwitchToAdmin={role === "admin" ? () => navigate("/admin") : undefined}
                   managedCreators={
                     accountType === "agency"
                       ? agencyCreators.map((c) => ({
