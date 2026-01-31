@@ -1166,6 +1166,7 @@ export default function App() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
     if (roleLoading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>;
     if (role !== "admin") return <Navigate to="/app" replace />;
 
@@ -1186,6 +1187,7 @@ export default function App() {
   const CreatorView = () => {
     const navigate = useNavigate();
     // Only allow access if user has a session. Role doesn't block admins anymore.
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
 
     return (
       <div className="min-h-screen bg-[#0A0A0A] pb-20">
