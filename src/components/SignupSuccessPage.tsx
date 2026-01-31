@@ -1,4 +1,4 @@
-import { Mail, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import logo from "figma:asset/136d294c79c3778ac95b0b1978b968aedfe25bbd.png";
 
 interface SignupSuccessPageProps {
@@ -6,7 +6,7 @@ interface SignupSuccessPageProps {
     onContinueToLogin: () => void;
 }
 
-export function SignupSuccessPage({ email, onContinueToLogin }: SignupSuccessPageProps) {
+export function SignupSuccessPage({ onContinueToLogin }: SignupSuccessPageProps) {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-[#0A0A0A]">
             <div className="w-full max-w-md">
@@ -31,19 +31,8 @@ export function SignupSuccessPage({ email, onContinueToLogin }: SignupSuccessPag
 
                     <h1 className="text-2xl font-semibold text-white mb-2">Registration Successful!</h1>
                     <p className="text-slate-400 mb-8">
-                        Thank you for joining DobbleTap. We've sent a confirmation email to:
-                        <br />
-                        <span className="text-white font-medium">{email}</span>
+                        Thank you for joining DobbleTap. You can now login.
                     </p>
-
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-8 text-left">
-                        <div className="flex items-start gap-3">
-                            <Mail className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                            <p className="text-sm text-blue-200">
-                                Please click the link in your email to confirm your account. You won't be able to log in until your email is verified.
-                            </p>
-                        </div>
-                    </div>
 
                     <button
                         onClick={onContinueToLogin}

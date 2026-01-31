@@ -850,14 +850,27 @@ export default function App() {
       return;
     }
 
-    if (signUpData.session) {
-      toast.success("Account created! Logging you in...");
-      setSignupStep(1);
-      navigate("/app");
-    } else {
-      // Show success screen (step 4)
-      setSignupStep(4);
+    if (signUpData.user) {
+      // Store user data in profiles table as requested
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          user_id: signUpData.user.id,
+          full_name: accountData.fullName,
+          email: accountData.email,
+          phone: accountData.phone,
+          account_type: accountType,
+          created_at: new Date().toISOString(),
+          role: "creator",
+        }, { onConflict: "user_id" });
+
+      if (profileError) {
+        console.error("Profile creation failed:", profileError);
+      }
     }
+
+    // Always show the success screen to confirm registration
+    setSignupStep(4);
   };
 
   const handleBackSignup = () => {
