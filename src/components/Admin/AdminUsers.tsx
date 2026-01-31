@@ -7,6 +7,7 @@ interface Profile {
     full_name: string | null;
     email: string | null;
     role: string | null;
+    account_type: string | null;
     created_at: string;
 }
 
@@ -25,10 +26,13 @@ export const AdminUsers: React.FC = () => {
         try {
             const { data, error } = await supabase
                 .from("profiles")
-                .select("user_id, full_name, email, role, created_at")
+                .select("user_id, full_name, email, role, account_type, created_at")
                 .order("created_at", { ascending: false });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Supabase error:", error);
+                throw error;
+            }
             setUsers(data || []);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -90,6 +94,7 @@ export const AdminUsers: React.FC = () => {
                         <thead>
                             <tr className="border-b border-white/10 bg-white/[0.02]">
                                 <th className="px-6 py-4 text-sm font-semibold text-slate-400">User</th>
+                                <th className="px-6 py-4 text-sm font-semibold text-slate-400">Type</th>
                                 <th className="px-6 py-4 text-sm font-semibold text-slate-400">Role</th>
                                 <th className="px-6 py-4 text-sm font-semibold text-slate-400">Joined</th>
                                 <th className="px-6 py-4 text-sm font-semibold text-slate-400 text-right">Actions</th>
@@ -123,9 +128,17 @@ export const AdminUsers: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin'
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${user.account_type === 'agency'
                                                 ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                                : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                }`}>
+                                                {user.account_type || 'creator'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'bg-white/5 text-slate-400 border border-white/10'
                                                 }`}>
                                                 {user.role === 'admin' && <BadgeCheck className="w-3 h-3" />}
                                                 {user.role || 'creator'}

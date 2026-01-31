@@ -9,27 +9,40 @@ export const AdminDashboard: React.FC = () => {
         activeCampaigns: 0,
         platformEarnings: 0,
     });
+    const [recentUsers, setRecentUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             setLoading(true);
             try {
-                // In a real app, these would be RPCs or aggregated queries
+                // Get absolute total
                 const { count: usersCount } = await supabase
                     .from("profiles")
                     .select("*", { count: "exact", head: true });
 
-                const { count: creatorsCount } = await supabase
-                    .from("creators")
-                    .select("*", { count: "exact", head: true });
+                // Get today's users count
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const { count: todayCount } = await supabase
+                    .from("profiles")
+                    .select("*", { count: "exact", head: true })
+                    .gte("created_at", today.toISOString());
+
+                // Get actual recent users
+                const { data: recent } = await supabase
+                    .from("profiles")
+                    .select("full_name, email, created_at")
+                    .order("created_at", { ascending: false })
+                    .limit(5);
 
                 setStats({
                     totalUsers: usersCount || 0,
-                    newUsersToday: 12, // Mock 
-                    activeCampaigns: 45, // Mock
-                    platformEarnings: 1250000, // Mock
+                    newUsersToday: todayCount || 0,
+                    activeCampaigns: 45, // Keep mock for now
+                    platformEarnings: 1250000, // Keep mock for now
                 });
+                setRecentUsers(recent || []);
             } catch (error) {
                 console.error("Error fetching admin stats:", error);
             } finally {
@@ -41,7 +54,7 @@ export const AdminDashboard: React.FC = () => {
 
     const cards = [
         { label: "Total Users", value: stats.totalUsers, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-        { label: "New Users (Today)", value: `+${stats.newUsersToday}`, icon: UserPlus, color: "text-green-500", bg: "bg-green-500/10" },
+        { label: "New Users (Today)", value: `+${stats.newUsersToday}`, icon: UserPlus, color: "text-emerald-500", bg: "bg-emerald-500/10" },
         { label: "Active Campaigns", value: stats.activeCampaigns, icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-500/10" },
         { label: "Total Volume", value: `₦${stats.platformEarnings.toLocaleString()}`, icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
     ];
@@ -73,8 +86,28 @@ export const AdminDashboard: React.FC = () => {
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
                     <h3 className="text-lg font-semibold mb-6">Recent Signups</h3>
                     <div className="space-y-4">
-                        {/* Table or list would go here */}
-                        <p className="text-slate-500 italic text-sm">Loading recent user activity...</p>
+                        {loading ? (
+                            <p className="text-slate-500 italic text-sm">Loading activity...</p>
+                        ) : recentUsers.length === 0 ? (
+                            <p className="text-slate-500 text-sm">No recent signups yet.</p>
+                        ) : (
+                            recentUsers.map((user, i) => (
+                                <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">
+                                            {user.full_name?.[0] || 'U'}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">{user.full_name || 'New User'}</p>
+                                            <p className="text-xs text-slate-500">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] text-slate-500">
+                                        {new Date(user.created_at).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
