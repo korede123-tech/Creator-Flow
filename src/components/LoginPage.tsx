@@ -60,9 +60,11 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
       setStatusMessage("");
     } catch (err) {
       setStatus("error");
+      console.error("Login attempt failed:", err);
       const message = err instanceof Error ? err.message : "Login failed";
+
       if (message === "Invalid login credentials") {
-        setStatusMessage("Invalid login credentials. Please check your email and password. (Hint: Make sure you've confirmed your email if required)");
+        setStatusMessage("Invalid login credentials. Please check your email and password. (Note: Make sure you've confirmed your email link if required)");
       } else if (message.toLowerCase().includes("email not confirmed")) {
         setStatusMessage("Please confirm your email address before logging in. Check your inbox for the confirmation link.");
       } else {

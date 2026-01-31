@@ -838,6 +838,7 @@ export default function App() {
         data: {
           full_name: accountData.fullName,
           phone: accountData.phone,
+          account_type: accountType,
           role: "creator", // Default role
         },
         emailRedirectTo: `${window.location.origin}/`,
@@ -850,8 +851,10 @@ export default function App() {
       return;
     }
 
-    if (signUpData.user) {
-      // Store user data in profiles table as requested
+    // If we have a session (meaning email confirmation is OFF), we can upsert the profile.
+    // If we DON'T have a session (email confirmation is likely ON), the upsert will fail with 401.
+    // In that case, we rely on the database trigger to create the basic profile.
+    if (signUpData.session && signUpData.user) {
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({
@@ -865,8 +868,10 @@ export default function App() {
         }, { onConflict: "user_id" });
 
       if (profileError) {
-        console.error("Profile creation failed:", profileError);
+        console.error("Profile enhancement failed (likely RLS):", profileError);
       }
+    } else if (signUpData.user) {
+      console.log("User created but no session (email confirmation likely required). Trigger should handle profile.");
     }
 
     // Always show the success screen to confirm registration
