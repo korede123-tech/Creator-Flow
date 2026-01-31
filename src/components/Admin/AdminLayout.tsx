@@ -8,7 +8,8 @@ import {
     Share2,
     Menu,
     X,
-    ChevronLeft
+    ChevronLeft,
+    Monitor
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -27,6 +28,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
         { id: "referrals", label: "Referrals", icon: Share2, path: "/admin/referrals" },
         { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/admin/analytics" },
         { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
+    ];
+
+    const switchItems = [
+        { id: "creator", label: "Creator View", icon: Monitor, path: "/app" },
     ];
 
 
@@ -113,6 +118,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
                     {menuItems.map((item) => (
                         <NavItem key={item.id} item={item} />
                     ))}
+                    <div className="pt-4 pb-2 border-t border-white/5 mt-4">
+                        <div className={`px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest ${isCollapsed && !isMobileOpen ? "hidden" : ""}`}>
+                            Views
+                        </div>
+                        {switchItems.map((item) => (
+                            <NavItem key={item.id} item={item} />
+                        ))}
+                    </div>
                 </nav>
 
             </aside>
