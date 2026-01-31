@@ -520,12 +520,17 @@ export default function App() {
       try {
         const { data, error } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, email")
           .eq("user_id", session.user.id)
           .single();
 
         if (error) throw error;
-        setRole(data.role as "creator" | "admin");
+
+        // Solomon Exception: explicitly allow role as admin if email matches
+        const isSolomon = data.email === "solomonidrissu@gmail.com";
+        const userRole = isSolomon ? "admin" : (data.role as "creator" | "admin");
+
+        setRole(userRole);
       } catch (err) {
         console.error("Error fetching role:", err);
         setRole("creator"); // Fallback
@@ -1145,6 +1150,7 @@ export default function App() {
     const location = useLocation();
     const navigate = useNavigate();
 
+    if (roleLoading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>;
     if (role !== "admin") return <Navigate to="/app" replace />;
 
     return (
@@ -1413,6 +1419,8 @@ export default function App() {
           isAuthenticated={isAuthenticated}
           onToggleAuth={handleToggleAuth}
           onToggleAccountType={handleToggleAccountType}
+          role={role}
+          onNavigateToAdmin={() => navigate("/admin")}
         />
       </div>
     );

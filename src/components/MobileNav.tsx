@@ -12,6 +12,8 @@ interface MobileNavProps {
   isAuthenticated: boolean;
   onToggleAuth: () => void;
   onToggleAccountType: () => void;
+  role?: string | null;
+  onNavigateToAdmin?: () => void;
 }
 
 export function MobileNav({
@@ -22,7 +24,9 @@ export function MobileNav({
   onNavigate,
   isAuthenticated,
   onToggleAuth,
-  onToggleAccountType
+  onToggleAccountType,
+  role,
+  onNavigateToAdmin
 }: MobileNavProps) {
   const handleNavigate = (screen: Screen) => {
     onNavigate(screen);
@@ -78,16 +82,15 @@ export function MobileNav({
               {navItems.filter(item => item.show).map(item => {
                 const Icon = item.icon;
                 const isActive = currentScreen === item.screen;
-                
+
                 return (
                   <button
                     key={item.screen}
                     onClick={() => handleNavigate(item.screen)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive
                         ? 'bg-white text-black'
                         : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     {item.label}
@@ -116,6 +119,17 @@ export function MobileNav({
               >
                 {isAuthenticated ? 'Account' : 'Login'}
               </button>
+              {role === 'admin' && onNavigateToAdmin && (
+                <button
+                  onClick={() => {
+                    onNavigateToAdmin();
+                    onClose();
+                  }}
+                  className="w-full px-4 py-2.5 bg-blue-600/10 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-600/20 transition-colors border border-blue-600/20"
+                >
+                  Admin Dashboard
+                </button>
+              )}
             </div>
           </motion.div>
         </>
