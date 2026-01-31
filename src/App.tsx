@@ -1162,7 +1162,8 @@ export default function App() {
   };
 
   const CreatorView = () => {
-    if (role === "admin") return <Navigate to="/admin" replace />;
+    const navigate = useNavigate();
+    // Only allow access if user has a session. Role doesn't block admins anymore.
 
     return (
       <div className="min-h-screen bg-[#0A0A0A] pb-20">
@@ -1182,6 +1183,14 @@ export default function App() {
                 <span className="ml-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs font-semibold rounded border border-purple-500/20">
                   AGENCY
                 </span>
+              )}
+              {role === "admin" && (
+                <button
+                  onClick={() => navigate("/admin")}
+                  className="ml-4 px-3 py-1 bg-blue-600/10 text-blue-400 text-xs font-bold rounded-full border border-blue-600/20 hover:bg-blue-600/20 transition-colors"
+                >
+                  ADMIN
+                </button>
               )}
             </div>
             <button

@@ -13,6 +13,7 @@ interface Profile {
 export const AdminUsers: React.FC = () => {
     const [users, setUsers] = useState<Profile[]>([]);
     const [loading, setLoading] = useState(true);
+    const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
@@ -33,6 +34,24 @@ export const AdminUsers: React.FC = () => {
             console.error("Error fetching users:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const toggleRole = async (userId: string, currentRole: string | null) => {
+        setUpdatingId(userId);
+        const nextRole = currentRole === "admin" ? "creator" : "admin";
+        try {
+            const { error } = await supabase
+                .from("profiles")
+                .update({ role: nextRole })
+                .eq("user_id", userId);
+
+            if (error) throw error;
+            setUsers(users.map(u => u.user_id === userId ? { ...u, role: nextRole } : u));
+        } catch (error) {
+            console.error("Error updating role:", error);
+        } finally {
+            setUpdatingId(null);
         }
     };
 
@@ -105,8 +124,8 @@ export const AdminUsers: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'admin'
-                                                    ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                                    : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                                : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                                                 }`}>
                                                 {user.role === 'admin' && <BadgeCheck className="w-3 h-3" />}
                                                 {user.role || 'creator'}
@@ -116,9 +135,21 @@ export const AdminUsers: React.FC = () => {
                                             {new Date(user.created_at).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-400">
-                                                <MoreVertical className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => toggleRole(user.user_id, user.role)}
+                                                    disabled={!!updatingId}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.role === 'admin'
+                                                        ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20'
+                                                        : 'bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20'
+                                                        }`}
+                                                >
+                                                    {updatingId === user.user_id ? "..." : user.role === 'admin' ? "Make Creator" : "Make Admin"}
+                                                </button>
+                                                <button className="p-2 hover:bg-white/10 rounded-lg transition-colors text-slate-400">
+                                                    <MoreVertical className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

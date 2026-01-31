@@ -9,7 +9,8 @@ import {
     Share2,
     Menu,
     X,
-    ChevronLeft
+    ChevronLeft,
+    Monitor
 } from "lucide-react";
 import { supabase } from "../../utils/supabase/client";
 
@@ -31,8 +32,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
         { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
     ];
 
+    const switchItems = [
+        { id: "creator", label: "Creator View", icon: Monitor, path: "/app" },
+    ];
+
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        const { error } = await supabase.auth.signOut();
+        if (error) console.error("Error logging out:", error);
         window.location.href = "/login";
     };
 
@@ -119,6 +125,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPath,
                     {menuItems.map((item) => (
                         <NavItem key={item.id} item={item} />
                     ))}
+                    <div className="pt-4 pb-2">
+                        <div className={`px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider ${isCollapsed ? "lg:hidden" : ""}`}>
+                            Switch View
+                        </div>
+                        {switchItems.map((item) => (
+                            <NavItem key={item.id} item={item} />
+                        ))}
+                    </div>
                 </nav>
 
                 <div className={`p-4 border-t border-white/10 ${isCollapsed ? "lg:px-2" : ""}`}>
