@@ -523,18 +523,27 @@ export default function App() {
           .from("profiles")
           .select("role, email")
           .eq("user_id", session.user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase role error:", error);
+          throw error;
+        }
 
-        // Solomon Exception: explicitly allow role as admin if email matches
-        const isSolomon = data.email === "solomonidrissu@gmail.com";
-        const userRole = isSolomon ? "admin" : (data.role as "creator" | "admin");
+        // Fallback check: If profile doesn't exist yet, we still check email for Solomon
+        const userEmail = data?.email || session.user.email;
+        const isSolomon = userEmail === "solomonidrissu@gmail.com";
+        const userRole = isSolomon ? "admin" : (data?.role as "creator" | "admin" || "creator");
 
         setRole(userRole);
       } catch (err) {
         console.error("Error fetching role:", err);
-        setRole("creator"); // Fallback
+        // Special case: if error is fetching Solomon, he is still admin
+        if (session.user.email === "solomonidrissu@gmail.com") {
+          setRole("admin");
+        } else {
+          setRole("creator");
+        }
       } finally {
         setRoleLoading(false);
       }
